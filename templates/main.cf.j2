@@ -29,7 +29,7 @@ compatibility_level = {{ postfix_compatibility_level }}
 
 {%if postfix_smtp_use_tls %}
 # smtp TLS parameters
-smtp_use_tls = {{ postfix_smtp_use_tls | bool | ternary('yes', 'no') }}
+smtp_use_tls = yes
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_security_level = {{ postfix_smtp_tls_security_level }}
 smtp_tls_note_starttls_offer = {{ postfix_smtp_tls_note_starttls_offer | bool | ternary('yes', 'no') }}
@@ -37,7 +37,7 @@ smtp_tls_note_starttls_offer = {{ postfix_smtp_tls_note_starttls_offer | bool | 
 
 {% if postfix_smtpd_use_tls %}
 # smtpd TLS parameters
-smtpd_use_tls = {{ postfix_smtpd_use_tls | bool | ternary('yes', 'no') }}
+smtpd_use_tls = yes
 smtpd_tls_cert_file = {{ postfix_smtpd_tls_cert_file }}
 smtpd_tls_key_file = {{ postfix_smtpd_tls_key_file }}
 smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level }}
@@ -60,7 +60,7 @@ inet_interfaces = {{ postfix_inet_interfaces }}
 inet_protocols = {{ postfix_inet_protocols }}
 
 {% if postfix_smtp_sasl_auth_enable %}
-smtp_sasl_auth_enable = {{ postfix_smtp_sasl_auth_enable | bool | ternary('yes', 'no') }}
+smtp_sasl_auth_enable = yes
 smtp_sasl_type = {{ postfix_smtp_sasl_type }}
 smtp_sasl_password_maps = hash:{{ postfix_sasl_passwd_path }}
 {% if postfix_smtp_sasl_security_options | length > 0 %}
@@ -69,7 +69,7 @@ smtp_sasl_security_options = {{ postfix_smtp_sasl_security_options | join(', ') 
 {% endif %}
 
 {% if postfix_smtpd_sasl_auth_enable %}
-smtpd_sasl_auth_enable = {{ postfix_smtpd_sasl_auth_enable | bool | ternary('yes', 'no') }}
+smtpd_sasl_auth_enable = yes
 smtpd_sasl_type = {{ postfix_smtpd_sasl_type }}
 {% if postfix_smtpd_sasl_security_options | length > 0 %}
 smtpd_sasl_security_options = {{ postfix_smtpd_sasl_security_options | join(', ') }}
@@ -84,4 +84,6 @@ smtpd_recipient_restrictions = {{ postfix_smtpd_recipient_restrictions | join(',
 smtpd_relay_restrictions = {{ postfix_smtpd_relay_restrictions | join(', ') }}
 {% endif %}
 
-disable_vrfy_command = {{ postfix_disable_vrfy_command | bool | ternary('yes', 'no') }}
+{% if postfix_disable_vrfy_command %}
+disable_vrfy_command = yes
+{% endif %}
