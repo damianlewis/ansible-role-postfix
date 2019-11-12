@@ -1,0 +1,6 @@
+---
+postfix_service: postfix
+
+postfix_config_path: /etc/postfix/main.cf
+postfix_sasl_passwd_path: /etc/postfix/sasl_passwd
+postfix_aliases_path: /etc/aliases

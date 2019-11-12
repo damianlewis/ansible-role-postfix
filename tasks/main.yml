@@ -1,0 +1,50 @@
+---
+- name: Ensure Postfix is installed
+  apt:
+    name: "{{ postfix_packages }}"
+
+- name: Configure Postfix
+  template:
+    src: main.cf.j2
+    dest: "{{ postfix_config_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - restart postfix
+
+- name: Configure SASL username/password
+  template:
+    src: sasl_passwd.j2
+    dest: "{{ postfix_sasl_passwd_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  when:
+  - postfix_relayhost is defined
+  - postfix_sasl_user is defined
+  - postfix_sasl_password is defined
+  notify:
+  - postmap sasl_passwd
+  - restart postfix
+
+- name: Configure aliases
+  lineinfile:
+    dest: "{{ postfix_aliases_path }}"
+    regexp: '^{{ item.user }}'
+    line: "{{ item.user }}: {{ item.alias }}"
+    owner: root
+    group: root
+    mode: 0644
+    create: true
+    state: present
+  loop: "{{ postfix_aliases }}"
+  notify:
+  - new aliases
+  - restart postfix
+
+- name: Ensure Postfix is running
+  service:
+    name: "{{ postfix_service }}"
+    state: "{{ postfix_service_state | default('started') }}"
+    enabled: "{{ postfix_service_enabled | default('yes') | bool }}"
