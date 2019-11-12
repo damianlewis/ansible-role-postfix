@@ -22,7 +22,6 @@
     mode: 0600
   when:
   - postfix_relayhost is defined
-  - postfix_relayhost_port is defined
   - postfix_sasl_user is defined
   - postfix_sasl_password is defined
   notify:

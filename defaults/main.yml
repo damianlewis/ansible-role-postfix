@@ -36,6 +36,7 @@ postfix_smtpd_sasl_type: cyrus
 postfix_smtpd_sasl_security_options: []
 postfix_smtpd_recipient_restrictions: []
 postfix_smtpd_relay_restrictions: []
+postfix_relayhost: ''
 postfix_relayhost_port: 587
 
 postfix_disable_vrfy_command: no
