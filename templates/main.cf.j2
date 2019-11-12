@@ -1,0 +1,87 @@
+# {{ ansible_managed }}
+
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+
+
+# Debian specific:  Specifying a file name will cause the first
+# line of that file to be used as the name.  The Debian default
+# is /etc/mailname.
+{% if postfix_myorigin %}
+myorigin = {{ postfix_myorigin }}
+{% else %}
+#myorigin = /etc/mailname
+{% endif %}
+
+smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+biff = no
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+readme_directory = no
+
+# See http://www.postfix.org/COMPATIBILITY_README.html -- default to 2 on
+# fresh installs.
+compatibility_level = {{ postfix_compatibility_level }}
+
+{%if postfix_smtp_use_tls %}
+# smtp TLS parameters
+smtp_use_tls = {{ postfix_smtp_use_tls | bool | ternary('yes', 'no') }}
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+smtp_tls_security_level = {{ postfix_smtp_tls_security_level }}
+smtp_tls_note_starttls_offer = {{ postfix_smtp_tls_note_starttls_offer | bool | ternary('yes', 'no') }}
+{% endif %}
+
+{% if postfix_smtpd_use_tls %}
+# smtpd TLS parameters
+smtpd_use_tls = {{ postfix_smtpd_use_tls | bool | ternary('yes', 'no') }}
+smtpd_tls_cert_file = {{ postfix_smtpd_tls_cert_file }}
+smtpd_tls_key_file = {{ postfix_smtpd_tls_key_file }}
+smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level }}
+smtpd_tls_loglevel = {{ postfix_smtpd_tls_loglevel }}
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+{% endif %}
+
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+
+myhostname = {{ postfix_myhostname }}
+alias_maps = hash:{{ postfix_aliases_path }}
+alias_database = hash:{{ postfix_aliases_path }}
+mydestination = {{ postfix_mydestination | join(', ') }}
+relayhost = {{ postfix_relayhost | default('') }}
+mynetworks = {{ postfix_mynetworks | join(' ') }}
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = {{ postfix_inet_interfaces }}
+inet_protocols = {{ postfix_inet_protocols }}
+
+{% if postfix_smtp_sasl_auth_enable %}
+smtp_sasl_auth_enable = {{ postfix_smtp_sasl_auth_enable | bool | ternary('yes', 'no') }}
+smtp_sasl_type = {{ postfix_smtp_sasl_type }}
+smtp_sasl_password_maps = hash:{{ postfix_sasl_passwd_path }}
+{% if postfix_smtp_sasl_security_options | length > 0 %}
+smtp_sasl_security_options = {{ postfix_smtp_sasl_security_options | join(', ') }}
+{% endif %}
+{% endif %}
+
+{% if postfix_smtpd_sasl_auth_enable %}
+smtpd_sasl_auth_enable = {{ postfix_smtpd_sasl_auth_enable | bool | ternary('yes', 'no') }}
+smtpd_sasl_type = {{ postfix_smtpd_sasl_type }}
+{% if postfix_smtpd_sasl_security_options | length > 0 %}
+smtpd_sasl_security_options = {{ postfix_smtpd_sasl_security_options | join(', ') }}
+{% endif %}
+{% endif %}
+
+{% if postfix_smtpd_recipient_restrictions | length > 0 %}
+smtpd_recipient_restrictions = {{ postfix_smtpd_recipient_restrictions | join(', ') }}
+{% endif %}
+
+{% if postfix_smtpd_relay_restrictions | length > 0 %}
+smtpd_relay_restrictions = {{ postfix_smtpd_relay_restrictions | join(', ') }}
+{% endif %}
+
+disable_vrfy_command = {{ postfix_disable_vrfy_command | bool | ternary('yes', 'no') }}

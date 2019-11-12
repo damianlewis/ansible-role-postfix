@@ -4,27 +4,14 @@
     name: "{{ postfix_packages }}"
 
 - name: Configure Postfix
-  lineinfile:
-    path: "{{ postfix_config_path }}"
-    regexp: '^(?P<name>#?{{ item.name }})(?P<operator>\\s*=\\s*)'
-    line: "\\g<name>\\g<operator>{{ item.value }}"
-    state: present
-    create: yes
-  when: item.value | length > 0
-  with_dict:
-  - myorigin: "{{ postfix_myorigin | default('') }}"
-  - myhostname: "{{ postfix_myhostname | default('') }}"
-  - mynetworks: "{{ postfix_mynetworks | default([]) | join(', ') }}"
-  - mydestination: "{{ postfix_mydestination | default([]) | join(', ') }}"
-  - inet_interfaces: "{{ postfix_inet_interfaces | default('all') }}"
-  - inet_protocols: "{{ postfix_inet_protocols | default('all') }}"
-  - relayhost: "{{ postfix_relayhost | default('') }}"
-  - disable_vrfy_command: "{{ postfix_disable_vrfy_command | default('no') | ternary('yes', 'no') }}"
-  notify: restart postfix
-
-# Configure TLS encryption and SASL authentication
-- include_tasks: configure-smtp.yml
-- include_tasks: configure-smtpd.yml
+  template:
+    src: main.cf.j2
+    dest: "{{ postfix_config_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - restart postfix
 
 - name: Configure SASL username/password
   template:

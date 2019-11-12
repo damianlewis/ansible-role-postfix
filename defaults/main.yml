@@ -4,6 +4,40 @@ postfix_packages:
 - postfix
 - sasl2-bin
 
+postfix_compatibility_level: 2
+
+postfix_myorigin: ''
+postfix_myhostname: "{{ ansible_fqdn }}"
+postfix_mynetworks:
+- '127.0.0.0/8'
+- '[::ffff:127.0.0.0]/104'
+- '[::1]/128'
+postfix_mydestination:
+- $myhostname
+- localhost.localdomain
+- localhost
+postfix_inet_interfaces: all
+postfix_inet_protocols: all
+
+postfix_smtp_use_tls: no
+postfix_smtp_tls_security_level: ''
+postfix_smtp_tls_note_starttls_offer: no
+postfix_smtpd_use_tls: no
+postfix_smtpd_tls_cert_file: /etc/ssl/certs/ssl-cert-snakeoil.pem
+postfix_smtpd_tls_key_file: /etc/ssl/private/ssl-cert-snakeoil.key
+postfix_smtpd_tls_security_level: ''
+postfix_smtpd_tls_loglevel: 0
+
+postfix_smtp_sasl_auth_enable: no
+postfix_smtp_sasl_type: cyrus
+postfix_smtp_sasl_security_options: []
+postfix_smtpd_sasl_auth_enable: no
+postfix_smtpd_sasl_type: cyrus
+postfix_smtpd_sasl_security_options: []
+postfix_smtpd_recipient_restrictions: []
+postfix_smtpd_relay_restrictions: []
 postfix_relayhost_port: 587
 
-# postfix_smtp_sasl_password_maps: hash:{{ postfix_sasl_passwd_path }}
+postfix_disable_vrfy_command: no
+
+postfix_aliases: []
