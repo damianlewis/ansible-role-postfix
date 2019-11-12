@@ -1,0 +1,64 @@
+---
+- name: Ensure Postfix is installed
+  apt:
+    name: "{{ postfix_packages }}"
+
+- name: Configure Postfix
+  lineinfile:
+    path: "{{ postfix_config_path }}"
+    regexp: '^(?P<name>#?{{ item.name }})(?P<operator>\\s*=\\s*)'
+    line: "\\g<name>\\g<operator>{{ item.value }}"
+    state: present
+    create: yes
+  when: item.value | length > 0
+  with_dict:
+  - myorigin: "{{ postfix_myorigin | default('') }}"
+  - myhostname: "{{ postfix_myhostname | default('') }}"
+  - mynetworks: "{{ postfix_mynetworks | default([]) | join(', ') }}"
+  - mydestination: "{{ postfix_mydestination | default([]) | join(', ') }}"
+  - inet_interfaces: "{{ postfix_inet_interfaces | default('all') }}"
+  - inet_protocols: "{{ postfix_inet_protocols | default('all') }}"
+  - relayhost: "{{ postfix_relayhost | default('') }}"
+  - disable_vrfy_command: "{{ postfix_disable_vrfy_command | default('no') | ternary('yes', 'no') }}"
+  notify: restart postfix
+
+# Configure TLS encryption and SASL authentication
+- include_tasks: configure-smtp.yml
+- include_tasks: configure-smtpd.yml
+
+- name: Configure SASL username/password
+  template:
+    src: sasl_passwd.j2
+    dest: "{{ postfix_sasl_passwd_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  when:
+  - postfix_relayhost is defined
+  - postfix_relayhost_port is defined
+  - postfix_sasl_user is defined
+  - postfix_sasl_password is defined
+  notify:
+  - postmap sasl_passwd
+  - restart postfix
+
+- name: Configure aliases
+  lineinfile:
+    dest: "{{ postfix_aliases_path }}"
+    regexp: '^{{ item.user }}'
+    line: "{{ item.user }}: {{ item.alias }}"
+    owner: root
+    group: root
+    mode: 0644
+    create: true
+    state: present
+  loop: "{{ postfix_aliases }}"
+  notify:
+  - new aliases
+  - restart postfix
+
+- name: Ensure Postfix is running
+  service:
+    name: "{{ postfix_service }}"
+    state: "{{ postfix_service_state | default('started') }}"
+    enabled: "{{ postfix_service_enabled | default('yes') | bool }}"

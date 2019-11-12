@@ -1,0 +1,9 @@
+---
+postfix_packages:
+- mailutils
+- postfix
+- sasl2-bin
+
+postfix_relayhost_port: 587
+
+# postfix_smtp_sasl_password_maps: hash:{{ postfix_sasl_passwd_path }}

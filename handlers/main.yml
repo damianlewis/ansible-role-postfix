@@ -1,0 +1,11 @@
+---
+- name: restart postfix
+  service:
+    name: "{{ postfix_service }}"
+    state: restarted
+
+- name: postmap sasl_passwd
+  command: postmap {{ postfix_sasl_passwd_path }}
+
+- name: new aliases
+  command: newalises
